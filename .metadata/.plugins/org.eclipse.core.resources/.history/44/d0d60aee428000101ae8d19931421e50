@@ -1,0 +1,50 @@
+package com.student.controllers;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.student.collections.Student;
+import com.student.service.KafkaService;
+
+@RestController
+public class StudentController {
+	
+	@Autowired
+	private KafkaService kafkaService;
+	
+	
+	public ResponseEntity<Student> createStudent(){
+		return null;
+	}
+	
+	
+	public ResponseEntity<Student> updateStudent(){
+		return null;
+	}
+	
+	public ResponseEntity<Boolean> deleteStudent(){
+		return null;
+	}
+	
+	public ResponseEntity<Student> getStudent(){
+		return null;
+	}
+	
+	
+	public ResponseEntity<List<Student>> getAllStudent(){
+		return null;
+	}
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+}

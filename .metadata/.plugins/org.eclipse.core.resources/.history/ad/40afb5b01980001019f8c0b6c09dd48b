@@ -1,0 +1,59 @@
+package com.student.repository;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import org.springframework.stereotype.Repository;
+
+import com.mongodb.WriteConcern;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.InsertOneResult;
+import com.student.collections.Student;
+
+@Repository
+public class StudentRepoImpl implements StudentRepo {
+	
+	 private final MongoCollection<Document> collection;
+	 
+	 
+	 public StudentRepoImpl(MongoCollection<Document> collection) {
+	        this.collection =  collection.withWriteConcern(WriteConcern.MAJORITY);;
+	    }
+
+	@Override
+	public Student saveStudent(Student student) {
+	
+		Document doc = new Document("name", student.getName())
+                .append("age", student.getAge())
+                .append("email", student.getEmail());
+		InsertOneResult insertResult = collection.insertOne(doc);
+		Optional.ofNullable(insertResult)
+        .orElseThrow(() -> new RuntimeException("Insert failed!"));
+		        ObjectId id = insertResult.getInsertedId().asObjectId().getValue();
+		        student.setId(id.toHexString()); 
+		        return student;
+		    
+	}
+
+	@Override
+	public Student uppdateStudent(Student student, String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Student geetStudentByRollNo(Integer rollNo) {
+		 Document doc = collection.find(Filters.eq("rollNo", rollNo)).first(); // ✅ works like findOne
+		    return doc != null ? documentToStudent(doc) : null;
+	}
+
+	@Override
+	public List<Student> getAllStudents() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

@@ -1,0 +1,40 @@
+package com.student.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+import com.student.collections.Student;
+import com.student.repository.StudentRepo;
+
+@Service
+public class StudentService {
+	
+	@Autowired
+	private StudentRepo studentRepo;
+	
+	
+	
+	public Student saveStudent(Student student) {
+		return studentRepo.saveStudent(student);
+	}
+	@CachePut(value="student", key="#rollNo")
+	public Student updateStudent(Integer rollNo,Student student) {
+		return studentRepo.updateStudent(student, rollNo);
+	}
+	@CacheEvict(value="student", key="#rollNo")
+	public Boolean deleteStudent(Integer rollNo) {
+		return studentRepo.deleteStudent(rollNo);
+	}
+	public List<Student>  getAllStudents(){
+		return studentRepo.getAllStudents();
+	}
+	@Cacheable(value ="student", key="#rollNo")
+	public Student getStudentByRollNo(Integer rollNo) {
+		return studentRepo.getStudentByRollNo(rollNo);
+	}
+}

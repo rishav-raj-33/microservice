@@ -1,0 +1,87 @@
+package com.student.controllers;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.student.collections.Student;
+import com.student.service.KafkaService;
+import com.student.service.StudentService;
+
+@RestController
+@RequestMapping("/api/students/")
+public class StudentController {
+	
+	@Autowired
+	private KafkaService kafkaService;
+	
+	@Autowired
+	private StudentService service;
+	
+	private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
+	
+	
+	
+	@PostMapping("/")
+	public ResponseEntity<Student> createStudent(@RequestBody Student student) throws JsonProcessingException{
+		Student saveStudent=service.saveStudent(student);
+		kafkaService.notifyAllService("");
+		return new ResponseEntity<>(saveStudent,HttpStatus.CREATED);
+	}
+	
+	@PutMapping("/{id}")
+	public ResponseEntity<Student> updateStudent(@RequestBody Student student,@PathVariable Integer id) throws JsonProcessingException{
+		Student updateStudent=service.updateStudent(id,student);
+		kafkaService.notifyAllService("");
+		return new ResponseEntity<>(updateStudent,HttpStatus.ACCEPTED);
+	}
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Boolean> deleteStudent(@PathVariable Integer id) throws JsonProcessingException{
+		Boolean success=service.deleteStudent(id);
+		kafkaService.notifyAllService("Student Deleted at:"+LocalDateTime.now());
+		return new ResponseEntity<>(success,HttpStatus.ACCEPTED);
+	}
+	@GetMapping("/{id}")
+	public ResponseEntity<Student> getStudent(@PathVariable Integer id) throws JsonProcessingException{
+		Student getStudent=service.getStudentByRollNo(id);
+		kafkaService.notifyAllService("");
+		return new ResponseEntity<>(getStudent,HttpStatus.FOUND);
+	}
+	
+	@GetMapping
+	public ResponseEntity<List<Student>> getAllStudent() throws JsonProcessingException{
+		List<Student> students=service.getAllStudents();
+		kafkaService.notifyAllService("");
+		return new ResponseEntity<>(students,HttpStatus.OK);
+	}
+	
+	@PostMapping("verify")
+	public ResponseEntity<Void> getVerification(@RequestBody String message){
+		logger.info(message);
+		return ResponseEntity.ok().build();
+	}
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+}

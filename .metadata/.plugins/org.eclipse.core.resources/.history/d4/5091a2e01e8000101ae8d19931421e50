@@ -1,0 +1,37 @@
+package com.student.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import org.springframework.stereotype.Service;
+
+import com.mongodb.client.FindIterable;
+import com.student.collections.Student;
+
+@Service
+public class StudentHelper {
+	
+	
+	public Student documentToStudent(Document doc) {
+	    Student student = new Student();
+	    student.setId(doc.getObjectId("_id").toHexString());  
+	    student.setRollNo(doc.getInteger("rollNo"));
+	    student.setName(doc.getString("name"));
+	    student.setAge(doc.getInteger("age"));
+	    return student;
+	}
+	
+	
+	public List<Student> getAllStudents(FindIterable<Document> docs){
+		List<Student> listOfStudents=new ArrayList<>();
+		for(Document d: docs) 
+			listOfStudents.add(documentToStudent(d));
+		return listOfStudents;
+	}
+	
+	
+	
+
+}

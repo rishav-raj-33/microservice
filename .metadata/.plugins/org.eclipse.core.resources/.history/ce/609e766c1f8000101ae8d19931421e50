@@ -1,0 +1,87 @@
+package com.student.repository;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import com.mongodb.WriteConcern;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.model.Updates;
+import com.mongodb.client.result.InsertOneResult;
+import com.mongodb.client.result.UpdateResult;
+import com.student.collections.Student;
+import com.student.service.StudentHelper;
+
+@Repository
+public class StudentRepoImpl implements StudentRepo {
+	
+	 @Autowired
+	 private StudentHelper helper;
+	 private final MongoCollection<Document> collection; 
+	 public StudentRepoImpl(MongoCollection<Document> collection) {
+	        this.collection =  collection.withWriteConcern(WriteConcern.MAJORITY);;
+	    }
+
+	@Override
+	public Student saveStudent(Student student) {
+	
+		Document doc = new Document("name", student.getName())
+                .append("age", student.getAge())
+                .append("email", student.getEmail());
+		InsertOneResult insertResult = collection.insertOne(doc);
+		Optional.ofNullable(insertResult)
+        .orElseThrow(() -> new RuntimeException("Insert failed!"));
+		        ObjectId id = insertResult.getInsertedId().asObjectId().getValue();
+		        student.setId(id.toHexString()); 
+		        return student;
+		    
+	}
+
+	@Override
+	public Student updateStudent(Student student, Integer rollNo) {
+	    Document updatedDoc = collection.findOneAndUpdate(
+	            Filters.eq("rollNo", rollNo),
+	            Updates.combine(
+	                    Updates.set("age", student.getAge()),
+	                    Updates.set("email", student.getEmail()),
+	                    Updates.set("name", student.getName())
+	            ),
+	            new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER) // return updated document
+	    );
+
+	    if (updatedDoc == null) {
+	        return null; // no student found
+	    }
+
+	    
+	    Student updatedStudent = new Student();
+	    updatedStudent.setRollNo(updatedDoc.getInteger("rollNo"));
+	    updatedStudent.setAge(updatedDoc.getInteger("age"));
+	    updatedStudent.setEmail(updatedDoc.getString("email"));
+	    updatedStudent.setName(updatedDoc.getString("name"));
+
+	    return updatedStudent;
+	}
+
+	@Override
+	public Student geetStudentByRollNo(Integer rollNo) {
+		 Document doc = collection.find(Filters.eq("rollNo", rollNo)).first();
+			Optional.ofNullable(doc)
+	        .orElseThrow(() -> new RuntimeException("Roll No Not Found"));
+		    return helper.documentToStudent(doc);
+	}
+
+	@Override
+	public List<Student> getAllStudents() {
+		 FindIterable<Document> docs = collection.find();
+		return helper.getAllStudents(docs);
+	}
+
+}

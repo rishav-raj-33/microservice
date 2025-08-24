@@ -1,0 +1,61 @@
+package com.student.repository;
+
+import java.util.List;
+
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import org.springframework.stereotype.Repository;
+
+import com.mongodb.WriteConcern;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.result.InsertOneResult;
+import com.student.collections.Student;
+
+@Repository
+public class StudentRepoImpl implements StudentRepo {
+	
+	 private final MongoCollection<Document> collection;
+	 
+	 
+	 public StudentRepoImpl(MongoCollection<Document> collection) {
+	        this.collection =  collection.withWriteConcern(WriteConcern.MAJORITY);;
+	    }
+
+	@Override
+	public Student saveStudent(Student student) {
+	
+		Document doc = new Document("name", student.getName())
+                .append("age", student.getAge())
+                .append("email", student.getEmail());
+                
+		 InsertOneResult result = collection.insertOne(doc);
+
+		
+		    if (result.wasAcknowledged() && result.getInsertedId() != null) {
+		        ObjectId id = result.getInsertedId().asObjectId().getValue();
+		        student.setId(id.toHexString()); 
+		        return student;
+		    } else {
+		        throw new RuntimeException("Insert failed!!");
+		    }
+	}
+
+	@Override
+	public Student uppdateStudent(Student student, String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Student geetStudentByRollNo(Integer rollNo) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Student> getAllStudents() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

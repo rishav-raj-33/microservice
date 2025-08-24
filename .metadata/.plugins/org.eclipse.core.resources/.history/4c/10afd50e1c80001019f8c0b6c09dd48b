@@ -1,0 +1,16 @@
+package com.student.repository;
+
+import java.util.List;
+
+import com.student.collections.Student;
+
+public interface StudentRepo {
+	
+	Student saveStudent(Student student);
+	Student uppdateStudent(Student student,String id);
+	Student geetStudentByRollNo(Integer rollNo);
+	List<Student> getAllStudents();
+	
+	
+
+}
