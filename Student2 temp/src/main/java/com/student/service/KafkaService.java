@@ -20,7 +20,7 @@ public class KafkaService  {
 	public boolean notifyAllService(String message) throws JsonProcessingException {
 		ObjectMapper mapper=new ObjectMapper();
 		String json=mapper.writeValueAsString(message);
-		this.kafkaTemplate.send("?",json);
+		this.kafkaTemplate.send("#{ '${kafka.topic}' }",json);
 		return true;
 	}
 	

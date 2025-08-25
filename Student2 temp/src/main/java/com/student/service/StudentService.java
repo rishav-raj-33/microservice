@@ -1,0 +1,53 @@
+package com.student.service;
+
+import java.util.List;
+
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Service;
+import com.student.collections.Student;
+
+
+@Service
+public class StudentService {
+	
+	@Autowired
+	private final MongoTemplate template;
+	
+	
+	public  StudentService(MongoTemplate template) {
+		this.template=template;
+	}
+	
+	
+	
+	@CachePut(value="student", key="#rollNo")
+	public Student updateStudent(Integer rollNo,Student student) {
+		return null;
+	}
+	@CacheEvict(value="student", key="#rollNo")
+	public Boolean deleteStudent(Integer rollNo) {
+		Student student=getStudentByRollNo(rollNo);
+		return template.remove(student).wasAcknowledged();
+	}
+	public List<Student>  getAllStudents(){
+		return template.findAll(Student.class);
+	}
+	@Cacheable(value ="student", key="#rollNo")
+	public Student getStudentByRollNo(Integer rollNo) {
+		Query query=new Query();
+		query.addCriteria(Criteria.where("rollNo").is(rollNo));
+		return (Student)template.find(query,Student.class);
+	}
+	public Student saveStudent(Student student) {
+		return template.save(student);
+	}
+	
+}
